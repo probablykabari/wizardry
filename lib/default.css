@@ -1,0 +1,41 @@
+/* reset */
+
+html,body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,p,blockquote,th,td {
+	margin: 0;
+	padding: 0;
+}
+
+table {
+	border-collapse: separate;
+	border-spacing: 0;
+}
+
+fieldset,img {
+	border: 0;
+}
+
+h1,h2,h3,h4,h5, h6 {
+	font-size: 100%;
+}
+
+:focus {
+	outline: 0
+}
+
+a img {
+	vertical-align: middle;
+	border: none;
+}
+
+caption, th, td {
+	text-align: left;
+	font-weight: normal
+}
+
+blockquote:before, blockquote:after,q:before, q:after {
+	content: ""
+}
+
+blockquote, q {
+	quotes: "" ""
+}
