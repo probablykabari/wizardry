@@ -3,19 +3,27 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-    <title>
-      Javascript Pagination
-    </title>
+    <title>Javascript Pagination</title>
+    <link rel="stylesheet" href="../lib/default.css" type="text/css" media="screen" title="no title" charset="utf-8">
+    
   </head>
   <body id="index">
+    <div id="default">
+      <ul></ul>
+      <div id="pagination"></div>
+    </div>
     <script src="../lib/mootools-1.2.4-core-nc.js" type="text/javascript" charset="utf-8"></script>
     <script src="../lib/mootools-1.2.4.more.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../lib/mootools-1.1-to-1.2-upgrade-helper.js" type="text/javascript" charset="utf-8"></script>
+    
     <script type="text/javascript" charset="utf-8">
       // javascript pagination
       var Paginator = new Class({
+        version: '1.2.4',
         options:{
           linkClass: "pagination-link",
-          activeClass: "active-page",
+          activeLinkClass: "active-page",
+          activePageClass: "active-page",
           displaynum: 3,
           onPageTurn: function(from_page, to_page){}
         },
@@ -29,8 +37,6 @@
         serialize: function(displaynum){
           this.pages = new Hash();
           this.element.getChildren().inGroupsOf(displaynum || this.options.displaynum).each(function(group , index){
-            // console.log("group");
-            // console.log(group);
             this.set(index, group);
           }, this.pages);
           // console.log("serialize");
@@ -96,6 +102,53 @@
         }
       });
       Paginator.implement( new Options, new Events );
+      
+      Paginator = Class.refactor(Paginator,{
+        serialize: function(displaynum){
+          this.pages = new Hash();
+          var slices = [];
+          var num = (displaynum || this.options.displaynum);
+          var els = this.element.getChildren();
+          var i = -num
+          // group els into pages
+          while ((i += num) < els.length)
+            slices.push(els.slice(i, i+num));
+          // console.debug('%o', slices);
+          slices.each(function(group , index){
+            this.set(index, group);
+          }, this.pages);
+          console.log("serialize");
+          // console.log(this.element.getChildren());
+          console.debug('%o', this.pages.values());
+        }
+      });
     </script>
+    <!-- setup -->
+    <script type="text/javascript" charset="utf-8">
+      var paginator;
+      function get_json (json) {
+        var html = json.map(function(data, i) {
+          data.tags = data.t.join(', ');
+          data.index = i;
+          return '<li><h4>{index}<a href="{u}" title="{d}">{d}</a></h4><p>tags: {tags}</p></li>'.substitute(data);
+        });
+        $("default").getFirst().set('html', html);
+        paginator = new Paginator($("default").getFirst(),
+                       {
+                         displaynum: 5,
+                         initialize: function(){
+                           $$(this.pages.get(0)).addClass("viewing");
+                           // console.log("initialize");
+                           // console.log(this.pages);
+                         },
+                         onPageTurn: function(from, to){
+                           $$(from).removeClass("viewing");
+                           $$(to).addClass("viewing");
+                         }
+                       });
+        $("pagination").adopt(paginator.pagination_buttons());
+      }
+    </script>
+    <script src="http://feeds.delicious.com/v2/json?count=18&callback=get_json" type="text/javascript" charset="utf-8"></script>
   </body>
 </html>
