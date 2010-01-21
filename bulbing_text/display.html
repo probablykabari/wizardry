@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+
+<html>
+   <head>
+      <title>Bulbing Text</title>
+      <style type="text/css" media="screen">
+      #frame{ positon: relative; width: 600px; height: 250px; margin: 0px auto; }
+      body{ font: 16px "Helvetica", Tahoma, Arial, sans-serif; }
+      </style>
+    </head>
+    <body id="test">
+        <div id="frame"></div>
+        
+          <script src="../lib/mootools-1.2.4-core-nc.js" type="text/javascript" charset="utf-8"></script>
+          <script src="../lib/mootools-1.2.4.more.js" type="text/javascript" charset="utf-8"></script>
+
+          <script type="text/javascript">
+            var text_bulb = new Class({
+                mrad: 100,
+                zoom: 4,
+                initialize: function(container){
+                    var i, gx, gy;
+                    this.container = $(container);
+                    this.color = new Color("#000");
+                    var render =[];
+                    
+                    for( gy = 0; gy<8; gy++){ // # of rows
+                      for(gx = 0; gx<20; gx++){ // # of columns                  
+                        var posx = 160+gx*30+$random(0,6)-5;
+                        var posy = 120+gy*30+$random(0,6)-5;
+
+                        var b = new Element('b',{
+                            'styles': {
+                              'left': posx + 'px',
+                              'top': posy + 'px',
+                              'position': 'absolute'
+                              },
+                            'html': '&#43;'
+                          }).setStyle('color', this.color.setBrightness(60));
+                        this.container.grab(b);
+                        b.store('bulb', { x: posx, y: posy, tsize: 16}); 
+                      }
+                    }
+                    this.container.getElements('b').each(function( el, j ){                   
+                      window.addEvent('mousemove', function(event){ this.render(event, el ); }.bindWithEvent(this) );
+                      }, this);
+                },
+
+                mag: function(){
+                },
+                render: function(event, el){
+                    var props = el.retrieve('bulb');
+                    
+                    var dx = event.page.x - props.x;
+                    var dy = event.page.y - props.y;
+                   // console.log("dx: "+dx+" dy: "+dy);
+                   // console.log("el x: "+el.x+" el y: "+el.y);
+                    // console.log("page x: " + event.page.x +" page y: "+event.page.y);
+                    // calculate distance to mouse -- square root of the coordinates
+                    var d = Math.sqrt(dx*dx+dy*dy);                
+
+                    var z = 1;
+                    var color = this.color;
+                    if( d >= this.mrad){
+                        // console.count("oustide");
+                        
+                        el.setStyles({
+                            'left': props.x+'px',
+                            'top': props.y +'px',
+                            'fontSize': props.tsize+'px',
+                            'color': color.setBrightness(60),
+                            'zIndex': 1
+                            });
+                    } else {
+                         // console.count("inside");
+                        // the spherical dispersion around the mouse
+                        var lensDisp = Math.sin(Math.PI*Math.abs(d/this.mrad));
+                        // position the text
+                        var elX = props.x - this.zoom*z*dx*lensDisp/4;
+                        var elY = props.y - this.zoom*z*dy*lensDisp/4;
+                        // magnification around the circle
+                        var lensMag = this.zoom*(1-Math.sin(Math.PI*Math.abs(d/this.mrad)/2));
+                        var tscale = props.tsize*(lensMag+z); 
+                        var color_change = Math.ceil(Math.abs(d/this.mrad)*40);
+                        
+                        el.setStyles({
+                          'left': elX+'px',
+                          'top': elY+'px',
+                          'fontSize': Math.ceil(tscale) +'px',
+                          'color': color.setBrightness(color_change),
+                          'zIndex': color_change + 500
+                          });
+                    }                
+                    //console.log("tscale: " +tscale + " lens mag: " + (lensMag +1) );
+                }
+            });
+            new text_bulb('frame');
+        </script>      
+  </body>
+</html>
+      
