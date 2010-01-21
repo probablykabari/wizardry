@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>
+      Javascript Pagination
+    </title>
+  </head>
+  <body id="index">
+    <script src="../lib/mootools-1.2.4-core-nc.js" type="text/javascript" charset="utf-8">
+</script><script src="../lib/mootools-1.2.4.more.js" type="text/javascript" charset="utf-8">
+</script><script type="text/javascript" charset="utf-8">
+//<![CDATA[
+      // javascript pagination
+      var Paginator = new Class({
+        options:{
+          linkClass: "pagination-link",
+          activeClass: "active-page",
+          displaynum: 3,
+          onPageTurn: function(from_page, to_page){}
+        },
+        initialize: function(element, options){
+          this.setOptions(options);
+          this.element = $(element);
+          this.serialize();
+          this.position = 0;
+          if (this.options.initialize) this.options.initialize.call(this);
+        },
+        serialize: function(displaynum){
+          this.pages = new Hash();
+          this.element.getChildren().inGroupsOf(displaynum || this.options.displaynum).each(function(group , index){
+            // console.log("group");
+            // console.log(group);
+            this.set(index, group);
+          }, this.pages);
+          // console.log("serialize");
+          // console.log(this.element.getChildren());
+          // console.log(this.pages.values());
+        },
+        go_to_page: function(pageNumber){
+          return this.pages.get(pageNumber);
+        },
+        turn_page: function(direction){
+          var from_page = this.pages.get(this.position) || [];
+          if( direction == 'ahead' ) this.position++;
+          else this.position--;
+          if(!this.position) this.prev_btn.setStyle('visibility','hidden');
+          else this.prev_btn.setStyle('visibility','visible');
+          if(!this.pages.get(this.position+1)) this.next_btn.setStyle('visibility','hidden');
+          else this.next_btn.setStyle('visibility','visible');
+          this.fireEvent("onPageTurn", [from_page, this.pages.get(this.position).remove(null)]);
+        },
+        pagination_links: function(){
+          this.page_links = this.pages.keys().map(function(page, index){
+            return new Element( "a", {
+                  "class": this.options.linkClass,
+                  "href": "#",
+                  "events": {
+                    "click":function(e) {
+                      e.preventDefault();
+                      this.go_to_page(index);
+                      this.page_links.each(function(link){ link.removeClass(this.options.activeClass)}.bind(this));
+                      this.page_links[index].addClass(this.options.activeClass);
+                    }.bindWithEvent(this)
+                  }
+                  }).setHTML(index+1);
+          }, this);
+          return this.page_links;
+        },
+        pagination_buttons: function() {
+          this.next_btn = new Element( "a", {
+                      "class": "next_btn",
+                      "href": "#",
+                      "events": {
+                        "click":function(e) {
+                          e.preventDefault();
+                          // console.log("ahead");
+                          this.turn_page("ahead");
+                        }.bindWithEvent(this)
+                      }
+                      }).setHTML("next");
+          if (this.pages.keys().length == 1) this.next_btn.setStyle("visibility","hidden");
+          this.prev_btn = new Element( "a", {
+                      "styles":{"visibility":"hidden"},
+                      "class": "prev_btn",
+                      "href": "#",
+                      "events": {
+                        "click":function(e) {
+                          e.preventDefault();
+                          // console.log("back");
+                          this.turn_page("back");
+                        }.bindWithEvent(this)
+                      }
+                      }).setHTML("previous");
+          return [this.prev_btn, this.next_btn];
+        }
+      });
+      Paginator.implement( new Options, new Events );
+    //]]>
+    </script>
+  </body>
+</html>
