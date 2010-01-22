@@ -39,3 +39,8 @@ blockquote:before, blockquote:after,q:before, q:after {
 blockquote, q {
 	quotes: "" ""
 }
+/* end reset */
+
+body{
+	font:12px Helvetica;
+}
