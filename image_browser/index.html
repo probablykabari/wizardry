@@ -1,121 +1,117 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>
+      Image Browser
+    </title>
+    <link rel="stylesheet" href="../lib/default.css" type="text/css" media="screen" title="no title" charset="utf-8" />
+  </head>
+  <body>
+    <script src="../lib/mootools-1.2.4-core-nc.js" type="text/javascript" charset="utf-8">
+</script><script src="../lib/mootools-1.2.4-core-nc.js" type="text/javascript" charset="utf-8">
+</script><script src="../lib/mootools-1.1-to-1.2-upgrade-helper.js" type="text/javascript" charset="utf-8">
+</script><script type="text/javascript" charset="utf-8">
+    MooTools.upgradeLogLevel = "warn";
 
-	<title>Image Browser</title>
-	<link rel="stylesheet" href="../lib/default.css" type="text/css" media="screen" title="no title" charset="utf-8">
-</head>
-
-<body>
-
-<script src="../lib/mootools-1.2.4-core-nc.js" type="text/javascript" charset="utf-8"></script>
-<script src="../lib/mootools-1.2.4-core-nc.js" type="text/javascript" charset="utf-8"></script>
-<script src="../lib/mootools-1.1-to-1.2-upgrade-helper.js" type="text/javascript" charset="utf-8"></script>
-<script type="text/javascript" charset="utf-8">
-  MooTools.upgradeLogLevel = "warn";
-  
-  // image gallery
-  var ImageBrowser = new Class({
+    // image gallery
+    var ImageBrowser = new Class({
     Implements: [Options, Events],
-  	options: {			
-  			onComplete: $empty, // effect to perform when the slide completes
-  			onSlide: $empty, // effect to perform while the image is sliding
-  			duration: 500,
-  			transition: "quad:out",
-  			unit : 87, // size of the image plus it's margin
-  			displaynum: 2
-  	},
-  	initialize : function(holder, images, options){
-  		$each(arguments, function(arg) {
-  			switch($type(arg)){
-  				case "element": 
-  					holder = $(holder);
-  					break;
-  				case "collection":
-  				case "array": 
-  					var thepics = new Asset.images( images, { // use Assets.js so you can have a grip of images
-  						onProgress: function(c){
-  							this.addImages( thepics.shift());				
-  							}.bind(this) 
-  						});
-  						break;
-  				case "object": 
-  					this.setOptions(options);
-  					break;
-  				default: break;
-  			};
-  		}, this);
-  		this.size = 0;
-  		this.position = 0;		
-  		this.moving = false;
-  		this.images = []; // there's probably a better way than this...
-  		if (this.options.unit > 0) this.options.unit *= (-1); // why don't options reinitialize?
-  		this.buildBrowser(holder);
-  	},
-  	// this just creates the actual DOM elements
-  	buildBrowser: function(holder){
-  		this.browser = new Element('div').addClass('ibBrowser').injectInside(holder);
-  		this.container = new Element('div').addClass('ibContainer').injectInside(this.browser);
-  		this.imgHolder = new Element('div').setStyle('margin-left', '0').addClass('ibOverflow').injectInside(this.container);
-  		this.nav = new Element('ul').addClass('ibNav').injectInside(this.browser);
-  		this.prev_btn = new Element('li').setStyle('visibility','hidden').addClass('prev').adopt(
-  				new Element('a',{
-  					"href":"#",
-  					"events":{
-  						"click": function(event) {
-  							event.preventDefault();
-  							this.animate('left');
-  						}.bindWithEvent(this)
-  					}
-  				}).setHTML('Previous')	
-  			).injectInside(this.nav);
-  		this.next_btn = new Element('li').addClass('next').adopt(
-  				new Element('a', {
-  					"href":"#",
-  					"events":{
-  						"click": function(event) {
-  							event.preventDefault();								
-  							this.animate('right');
-  						}.bindWithEvent(this)
-  					}
-  				}).setHTML('Next')
-  			).injectInside(this.nav);
-  	},
-  	// add the images to the page as they are loaded
-  	addImages : function(srcs){
-  		if ($chk(srcs)) {
-  			this.images.push(srcs);		
-  			srcs.injectInside(this.imgHolder);
-  			this.size += this.options.unit;		
-  			this.imgHolder.setStyle('width',Math.abs(this.size)+'px');				
-  		};
-  	},
-  	// move the div containing the images
-  	animate : function(direction){
-  		// TODO: make this add only the necessary amount of images, then load more as the user scrolls
-  		if( this.moving ) return;		
-  		this.fireEvent('onSlide', [this.imgHolder]);	
-  		if( direction == 'right' ) this.position++;
-  		else this.position--;
+    options: {      
+        onComplete: $empty, // effect to perform when the slide completes
+        onSlide: $empty,  // effect to perform while the image is sliding
+        duration: 500,
+        transition: "quad:out",
+        unit : 87, // size of the image plus it's margin
+        displaynum: 2
+    },
+    initialize : function(holder, images, options){
+      $each(arguments, function(arg) {
+        switch($type(arg)){
+          case "element": 
+            holder = $(holder);
+            break;
+          case "collection":
+          case "array": 
+            var thepics = new Asset.images( images, { // use Assets.js so you can have a grip of images
+              onProgress: function(c){
+                this.addImages( thepics.shift());       
+                }.bind(this) 
+              });
+              break;
+          case "object": 
+            this.setOptions(options);
+            break;
+          default: break;
+        };
+      }, this);
+      this.size = 0;
+      this.position = 0;    
+      this.moving = false;
+      this.images = []; // there's probably a better way than this...
+      if (this.options.unit > 0) this.options.unit *= (-1); // why don't options reinitialize?
+      this.buildBrowser(holder);
+    },
+    // this just creates the actual DOM elements
+    buildBrowser: function(holder){
+      this.browser = new Element('div').addClass('ibBrowser').injectInside(holder);
+      this.container = new Element('div').addClass('ibContainer').injectInside(this.browser);
+      this.imgHolder = new Element('div').setStyle('margin-left', '0').addClass('ibOverflow').injectInside(this.container);
+      this.nav = new Element('ul').addClass('ibNav').injectInside(this.browser);
+      this.prev_btn = new Element('li').setStyle('visibility','hidden').addClass('prev').adopt(
+          new Element('a',{
+            "href":"#",
+            "events":{
+              "click": function(event) {
+                event.preventDefault();
+                this.animate('left');
+              }.bindWithEvent(this)
+            }
+          }).setHTML('Previous')  
+        ).injectInside(this.nav);
+      this.next_btn = new Element('li').addClass('next').adopt(
+          new Element('a', {
+            "href":"#",
+            "events":{
+              "click": function(event) {
+                event.preventDefault();               
+                this.animate('right');
+              }.bindWithEvent(this)
+            }
+          }).setHTML('Next')
+        ).injectInside(this.nav);
+    },
+    // add the images to the page as they are loaded
+    addImages : function(srcs){
+      if ($chk(srcs)) {
+        this.images.push(srcs);   
+        srcs.injectInside(this.imgHolder);
+        this.size += this.options.unit;   
+        this.imgHolder.setStyle('width',Math.abs(this.size)+'px');        
+      };
+    },
+    // move the div containing the images
+    animate : function(direction){
+      // TODO: make this add only the necessary amount of images, then load more as the user scrolls
+      if( this.moving ) return;   
+      this.fireEvent('onSlide', [this.imgHolder]);  
+      if( direction == 'right' ) this.position++;
+      else this.position--;
 
-  		var newMargin = this.options.unit * this.position;
+      var newMargin = this.options.unit * this.position;
 
-  		new Fx.Style(this.imgHolder, 'margin-left', {duration: this.options.duration, transition: this.options.transition, 
-  			onStart :  function(){this.moving = true;  }.bind(this), 
-  			onComplete : function(){ this.moving = false; this.fireEvent('onComplete', [this.imgHolder], 25); }.bind(this)
-  			}).start(newMargin);
+      new Fx.Style(this.imgHolder, 'margin-left', {duration: this.options.duration, transition: this.options.transition, 
+        onStart :  function(){this.moving = true;  }.bind(this), 
+        onComplete : function(){ this.moving = false; this.fireEvent('onComplete', [this.imgHolder], 25); }.bind(this)
+        }).start(newMargin);
 
-  		if(!this.position) this.prev_btn.setStyle('visibility','hidden');
-  		else this.prev_btn.setStyle('visibility','visible');
-  		if(this.position == (this.images.length-this.options.displaynum) ) this.next_btn.setStyle('visibility','hidden');
-  		else this.next_btn.setStyle('visibility','visible');
-  	}	
-  });
-  
-</script>
-</body>
-
+      if(!this.position) this.prev_btn.setStyle('visibility','hidden');
+      else this.prev_btn.setStyle('visibility','visible');
+      if(this.position == (this.images.length-this.options.displaynum) ) this.next_btn.setStyle('visibility','hidden');
+      else this.next_btn.setStyle('visibility','visible');
+    } 
+    });
+    </script>
+  </body>
 </html>
