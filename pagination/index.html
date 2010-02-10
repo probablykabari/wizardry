@@ -28,7 +28,6 @@
       .active-page-link{
         color:red;
       }
-      
     </style>
   </head>
   <body id="index">
@@ -71,11 +70,11 @@
           
         // default 
         paginator = new Paginator($("default").getFirst());
-        $("default").getElement(".pagination").adopt(paginator.pagination_buttons());
+        $("default").getElement(".pagination").adopt(paginator.paginationButtons());
         
         // with page links
         paginator_wl = new Paginator($("with_page_links").getFirst());
-        $("with_page_links").getElement(".pagination").adopt(paginator_wl.pagination_links());
+        $("with_page_links").getElement(".pagination").adopt(paginator_wl.paginationLinks());
         
         // with fx
         paginator_wfx = new Paginator($("with_fx").getFirst(),{
@@ -88,7 +87,7 @@
             to_page.fade('in');              
           }
         });
-        $("with_fx").getElement(".pagination").adopt(paginator_wfx.pagination_buttons());
+        $("with_fx").getElement(".pagination").adopt(paginator_wfx.paginationButtons());
         
       }
     </script>
