@@ -34,7 +34,6 @@
     <h2>Default</h2>
     <div id="default" class="example">
       <ul></ul>
-      <div class="pagination"></div>
     </div>
     
     <h2>With Page Links</h2>
@@ -70,11 +69,13 @@
           
         // default 
         paginator = new Paginator($("default").getFirst());
-        $("default").getElement(".pagination").adopt(paginator.paginationButtons());
         
         // with page links
-        paginator_wl = new Paginator($("with_page_links").getFirst());
-        $("with_page_links").getElement(".pagination").adopt(paginator_wl.paginationLinks());
+        paginator_wl = new Paginator($("with_page_links").getFirst(), {
+          onInitialize: function(){ 
+            this.paginationLinks().inject(this.element, "after");
+          }
+        });
         
         // with fx
         paginator_wfx = new Paginator($("with_fx").getFirst(),{
@@ -87,7 +88,6 @@
             to_page.fade('in');              
           }
         });
-        $("with_fx").getElement(".pagination").adopt(paginator_wfx.paginationButtons());
         
       }
     </script>

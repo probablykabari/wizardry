@@ -27,8 +27,10 @@ var Paginator = new Class({
     linkClass: "pagination-link",
     activeLinkClass: "active-page-link",
     display: 3,
-    start_position: 0
-    // onInitialize: $empty(),
+    startPosition: 0,
+    onInitialize: function(){
+      this.paginationButtons().inject(this.element, "after"); 
+    },
     // onPageAhead: $lambda(from_page, to_page),
     // onPageBack: $lambda(from_page, to_page),
     onPageTurn: function(from_page, to_page){
@@ -39,29 +41,26 @@ var Paginator = new Class({
   initialize: function(element, options){
     this.setOptions(options);
     this.element = $(element);
+    this.element.store("paginator", this);
     this.serialize();
-    this.position = this.options.start_position;
-    this.fireEvent('initialize');
+    this.position = this.options.startPosition;
     if(this.pages.has(this.position)){
-      this.fireEvent("pageTurn", [$([]), this.pages.get(this.position)]);
+      this.fireEvent("pageTurn", [$$([]), this.pages.get(this.position)]);
     }
+    this.fireEvent('initialize');
   },
   serialize: function(display){
     this.pages = new Hash();
     var slices = [];
     var num = (display || this.options.display);
-    var els = this.element.getChildren();
+    var els = this.element.getChildren("*[class!="+ this.options.linkClass +"]");
     var i = -num
     // group els into pages
     while ((i += num) < els.length)
       slices.push(els.slice(i, i+num));
-    // console.debug('%o', slices);
     slices.each(function(group , index){
       this.set(index, $$(group));
     }, this.pages);
-    // console.log("serialize");
-    // console.log(this.element.getChildren());
-    // console.debug('%o', this.pages.values());
   },
   current: function(){
     this.pages.get(this.position);
@@ -79,7 +78,7 @@ var Paginator = new Class({
     if( direction == 'ahead' ) this.position++;
     else this.position--;
     this.fireEvent("pageTurn", [from_page, this.pages.get(this.position)]);
-    this.fireEvent("page" + (direction || 'ahead').capitalize(), [from_page, this.pages.get(this.position)]);
+    this.fireEvent("page" + (direction || 'ahead').capitalize(), [from_page, this.current()]);
 
     // display or hide links based on how many pages are left
     if(!this.position) this.prev_btn.setStyle('visibility','hidden');
@@ -97,7 +96,7 @@ var Paginator = new Class({
                 e.preventDefault();
                 var prev_page = $$(this.page_links).filter("a[class~=" + this.options.activeLinkClass +"]");
                 prev_page.removeClass(this.options.activeLinkClass);
-                this.goToPage((prev_page.get('html') -1), index);
+                this.goToPage((prev_page.get('html') - 1), index);
                 this.page_links[index].addClass(this.options.activeLinkClass);
               }.bindWithEvent(this)
             
@@ -105,7 +104,7 @@ var Paginator = new Class({
             }).set('html', (index + 1));
     }, this);
     this.page_links[this.position].addClass(this.options.activeLinkClass);
-    return this.page_links;
+    return new Elements($A(this.page_links).reverse());
   },
   paginationButtons: function() {
     this.next_btn = new Element( "a", {
@@ -134,11 +133,20 @@ var Paginator = new Class({
                   }.bindWithEvent(this)
                 }
                 });
-    return [this.prev_btn, this.next_btn];
+    return new Elements([this.next_btn, this.prev_btn]);
+  },
+  add: function(element, where){
+    this.element.inject(element, where);
+    this.serialize();
+  },
+  remove: function(element){
+    if (this.hasChild(element)) element.dispose(); this.serialize();
   }
 });
 
-// Element.implement({
-//     paginate: function(options){
-//     }
-// });
+Element.implement({
+    paginate: function(options){
+      new Paginator(options);
+      return this;
+    }
+});
